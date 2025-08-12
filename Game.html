@@ -1,0 +1,865 @@
+<html>
+
+<head>
+	<title>Assignment 7 - Link </title>
+	<meta charset="UTF-8">
+</head>
+
+
+<body>
+	<h1> Link Explores! </h1>
+	<h2> By: Charlie Whitehead </h2>
+
+	<br>
+
+	<canvas id="myCanvas" width="480" height="480" style="border:1px solid #cccccc; background-color:#d2f7c6;"></canvas>
+
+	<script type="text/javascript">
+
+		class Sprite {
+			constructor(xx, yy, ww, hh, image) {
+				this.x = xx;
+				this.y = yy;
+				this.w = ww;
+				this.h = hh;
+
+				this.im = new Image();
+				this.im.src = image;
+
+				this.direction;
+			}
+
+
+			isTile() {
+				return false;
+			}
+			isPot() {
+				return false;
+			}
+			isLink() {
+				return false;
+			}
+			isBoom() {
+				return false;
+			}
+
+			setPreviousPos() {
+				this.px = this.x;
+				this.py = this.y;
+			}
+
+			isSliding(fact) {
+				return false;
+			}
+
+			isHit(fact) {
+				return false;
+			}
+
+			setDirection(way) {
+				way = 0;
+			}
+
+		}
+
+
+		class Link extends Sprite {
+			constructor(x, y, w, h, image) {
+				super(x, y, w, h, image);
+				this.x = x;
+				this.y = y;
+				this.w = w;
+				this.h = h;
+
+				this.px = 0;
+				this.py = 0;
+
+				this.direction = 0;
+
+				this.scrollX = 0;
+				this.scrollY = 0;
+
+				this.currentImageR = 0;
+				this.ImagesR = [];
+
+				for (let i = 0; i < 6; i++) {
+					var image = new Image();
+					image.src = "link" + (i + 25) + ".png";
+					this.ImagesR.push(image.src);
+				}
+
+				this.currentImageL = 0;
+				this.ImagesL = [];
+
+				for (let i = 0; i < 6; i++) {
+					var image = new Image();
+					image.src = "link" + (i + 19) + ".png";
+					this.ImagesL.push(image.src);
+				}
+
+				this.currentImageD = 0;
+				this.ImagesD = [];
+
+				for (let i = 0; i < 9; i++) {
+					var image = new Image();
+					image.src = "link" + (i + 1) + ".png";
+					this.ImagesD.push(image.src);
+				}
+
+				this.currentImageU = 0;
+				this.ImagesU = [];
+
+				for (let i = 0; i < 9; i++) {
+					var image = new Image();
+					image.src = "link" + (i + 10) + ".png";
+					this.ImagesU.push(image.src);
+				}
+
+			}
+
+			update() {
+			}
+
+			changeImageStateR() {
+				this.currentImageR++;
+
+				if (this.currentImageR > 5)
+					this.currentImageR = 0;
+
+				this.im.src = this.ImagesR[this.currentImageR];
+			}
+
+			changeImageStateL() {
+				this.currentImageL++;
+
+				if (this.currentImageL > 5)
+					this.currentImageL = 0;
+
+				this.im.src = this.ImagesL[this.currentImageL];
+			}
+
+			changeImageStateD() {
+				this.currentImageD++;
+
+				if (this.currentImageD > 8)
+					this.currentImageD = 0;
+
+				this.im.src = this.ImagesD[this.currentImageD];
+			}
+
+			changeImageStateU() {
+				this.currentImageU++;
+
+				if (this.currentImageU > 8)
+					this.currentImageU = 0;
+
+				this.im.src = this.ImagesU[this.currentImageU];
+			}
+
+			getOutOfTile(t) {
+				let lR = this.x + this.w;
+				let lL = this.x;
+				let lH = this.y;
+				let lT = this.y + this.h;
+
+				let tR = t.x + t.w;
+				let tL = t.x;
+				let tT = t.y;
+				let tB = t.y + t.h;
+
+				//left collision
+				if ((lR <= tR) && (this.px + this.w <= tL)) {
+					this.x = t.x - this.w;
+					//console.log("right into left");
+				}
+
+				//right collision
+				if ((lL <= tL) && (this.px >= tR)) {
+					this.x = t.x + t.w;
+					//wasconsole.log("left into right");
+				}
+
+				//top collision
+				if ((t.y <= lT <= tB) && (this.py + this.h <= t.y)) {
+					this.y = t.y + t.h;
+					console.log("top into bottom");
+				}
+
+				//bottom collision
+				if ((this.py >= tB) && (this.py >= tB)) {
+					this.y = t.y - t.h;
+					console.log("bottom into top");
+				}
+
+			}
+
+			setPreviousPos() {
+
+				this.px = this.x;
+				this.py = this.y;
+			}
+
+			isLink() {
+				return true;
+			}
+
+		}
+
+
+		class Tile extends Sprite {
+			constructor(x, y, w, h, image) {
+				super(x, y, w, h, image);
+			}
+
+			update() {
+
+
+			}
+
+			setPreviousPos() {
+
+				this.px = this.x;
+				this.py = this.y;
+			}
+
+			isTile() {
+				return true;
+			}
+
+		}
+
+		class Pot extends Sprite {
+			constructor(x, y, w, h, image) {
+				super(x, y, w, h, image);
+				this.x = x;
+				this.y = y;
+				this.w = w;
+				this.h = h;
+
+				this.hit = false;
+				this.sliding = false;
+				this.direction = 0;
+
+				this.currentImageP = 0;
+				this.ImagesP = [];
+
+				for (let i = 0; i < 2; i++) {
+					var image = new Image();
+					image.src = "pot" + (i + 1) + ".png";
+					this.ImagesP.push(image.src);
+				}
+			}
+
+			update() {
+				if (this.hit) {
+					this.changeImageStateP();
+					//console.log("breaking");
+				}
+				if (this.sliding) {
+					//this.y += 3;
+					//console.log(this.direction);
+					if (this.direction == 1) {
+						this.y += 3;
+					}
+					if (this.direction == 2) {
+						this.y -= 3;
+					}
+					if (this.direction == 3) {
+						this.x += 3;
+					}
+					if (this.direction == 4) {
+						this.x -= 3;
+					}
+				}
+			}
+
+			changeImageStateP() {
+				this.currentImageP++;
+
+				this.im.src = this.ImagesP[this.currentImageP];
+			}
+
+			setSliding(fact) {
+				this.sliding = fact;
+				//console.log(this.sliding);
+			}
+
+			setHit(fact) {
+				this.hit = fact;
+			}
+
+			isHit() {
+				if (this.hit)
+					return true;
+			}
+
+			setDirection(way) {
+				this.direction = way;
+			}
+
+			setPreviousPos() {
+
+				this.px = this.x;
+				this.py = this.y;
+			}
+
+			isPot() {
+				return true;
+			}
+
+		}
+
+
+		class Boomerang extends Sprite {
+			constructor(x, y, w, h, image, direction) {
+				super(x, y, w, h, image);
+				this.x = x;
+				this.y = y;
+				this.w = w;
+				this.h = h;
+
+				this.hit = false;
+				this.direction = direction;
+
+				this.currentImageB = 0;
+				this.ImagesB = [];
+
+				for (let i = 0; i < 4; i++) {
+					var image = new Image();
+					image.src = "boomerang" + (i + 1) + ".png";
+					this.ImagesB.push(image.src);
+				}
+			}
+
+			update() {
+				//this.x += 6;
+				this.changeImageStateB();
+
+				if (this.direction == 1) {
+					this.y += 3;
+				}
+				if (this.direction == 2) {
+					this.y -= 3;
+				}
+				if (this.direction == 3) {
+					this.x += 3;
+				}
+				if (this.direction == 4) {
+					this.x -= 3;
+				}
+			}
+
+			changeImageStateB() {
+				this.currentImageB++;
+
+				if (this.currentImageB > 3)
+					this.currentImageB = 0;
+
+				this.im.src = this.ImagesB[this.currentImageB];
+			}
+
+			setHit(fact) {
+				this.hit = fact;
+			}
+
+			isHit() {
+				if (this.hit)
+					return true;
+			}
+
+			setPreviousPos() {
+
+				this.px = this.x;
+				this.py = this.y;
+			}
+
+			isBoom() {
+				return true;
+			}
+
+		}
+
+
+		class Model {
+			constructor() {
+				//make array
+				this.sprites = [];
+
+				//draw + push link
+				this.link = (new Link(50, 50, 36, 36, "link1.png"));
+				this.sprites.push(this.link);
+
+				//drawing tiles
+				this.sprites.push(new Tile(0, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(30, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(60, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(90, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(120, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(150, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(180, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(210, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(240, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(270, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(300, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(330, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(360, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(390, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(420, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(480, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(510, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(540, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(570, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(600, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(630, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(660, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(690, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(720, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(750, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(780, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(810, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(840, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(870, 0, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 0, 30, 30, "tile.png"));
+
+				this.sprites.push(new Tile(0, 30, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 60, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 90, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 120, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 150, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 180, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 210, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 240, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 270, 30, 40, "tile.png"));
+				this.sprites.push(new Tile(0, 300, 30, 40, "tile.png"));
+				this.sprites.push(new Tile(0, 330, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 360, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 390, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 420, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 480, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 510, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 540, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 570, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 600, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 630, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 660, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 690, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 720, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 750, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 780, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 810, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 840, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 870, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(0, 900, 30, 30, "tile.png"));
+
+				this.sprites.push(new Tile(450, 30, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 60, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 90, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(450, 120, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(450, 150, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(450, 180, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 210, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 240, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 270, 30, 40, "tile.png"));
+				this.sprites.push(new Tile(450, 300, 30, 40, "tile.png"));
+				this.sprites.push(new Tile(450, 330, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 360, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 390, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 420, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 480, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 510, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 540, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 570, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 600, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(450, 630, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(450, 660, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(450, 690, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 720, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 750, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 780, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 810, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 840, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 870, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 900, 30, 30, "tile.png"));
+
+				this.sprites.push(new Tile(30, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(60, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(90, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(120, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(150, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(180, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(210, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(240, 450, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(270, 450, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(300, 450, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(330, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(360, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(390, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(420, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(480, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(510, 450, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(540, 450, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(570, 450, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(600, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(630, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(660, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(690, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(720, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(750, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(780, 450, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(810, 450, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(840, 450, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(870, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 450, 30, 30, "tile.png"));
+
+				this.sprites.push(new Tile(900, 30, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 60, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 90, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 120, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 150, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 180, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 210, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 240, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 270, 30, 40, "tile.png"));
+				this.sprites.push(new Tile(900, 300, 30, 40, "tile.png"));
+				this.sprites.push(new Tile(900, 330, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 360, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 390, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 420, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 450, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 480, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 510, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 540, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 570, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 600, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 630, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 660, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 690, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 720, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 750, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 780, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 810, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 840, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 870, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(900, 900, 30, 30, "tile.png"));
+
+				this.sprites.push(new Tile(30, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(60, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(90, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(120, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(150, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(180, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(210, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(240, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(270, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(300, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(330, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(360, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(390, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(420, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(450, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(480, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(510, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(540, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(570, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(600, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(630, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(660, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(690, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(720, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(750, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(780, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(810, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(840, 900, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(870, 900, 30, 30, "tile.png"));
+				//this.sprites.push(new Tile(900, 900, 30, 30, "tile.png"));
+
+				//extra tiles
+				//room 1
+				this.sprites.push(new Tile(120, 30, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(120, 60, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(120, 90, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(120, 120, 30, 30, "tile.png"));
+				this.sprites.push(new Tile(240, 90, 30, 30, "tile.png"));
+				//room 2
+				//room 3
+				//room 4
+
+
+
+				//adding pots
+				//room 1
+				this.sprites.push(new Pot(210, 210, 30, 30, "pot1.png"));
+				this.sprites.push(new Pot(60, 270, 30, 30, "pot1.png"));
+				this.sprites.push(new Pot(390, 390, 30, 30, "pot1.png"));
+				this.sprites.push(new Pot(330, 60, 30, 30, "pot1.png"));
+				//room 2
+				this.sprites.push(new Pot(300, 630, 30, 30, "pot1.png"));
+				//room 3
+				this.sprites.push(new Pot(510, 580, 30, 30, "pot1.png"));
+				//room 4
+				this.sprites.push(new Pot(660, 150, 30, 30, "pot1.png"));
+
+
+				//others
+				this.Bthrow = 0;
+				this.Pcount = 0;
+				this.direction = 0;
+			}
+
+			update() {
+				this.link.update();
+
+				//collision checking
+				for (let A = 0; A < this.sprites.length; A++) {
+					this.sprites[A].update();
+
+					for (let B = 0; B < this.sprites.length; B++) {
+						//let checker = this.isCollision(this.sprites[A], this.sprites[B]);
+						if (this.isCollision(this.sprites[A], this.sprites[B])) {
+							if (this.sprites[A].isPot() && this.sprites[B].isBoom()) {
+								//console.log("pot + boom");
+								this.sprites[B].setHit(true);
+								this.sprites[A].setHit(true);
+							}
+							if (this.sprites[A].isPot() && this.sprites[B].isLink()) {
+								//console.log("pot + link");
+								this.sprites[A].setSliding(true);
+								this.sprites[A].setDirection(this.direction);
+							}
+							if (this.sprites[A].isPot() && this.sprites[B].isTile()) {
+								//console.log("pot + tile");
+								this.sprites[A].setSliding(false);
+								this.sprites[A].setHit(true);
+							}
+							if (this.sprites[A].isTile() && this.sprites[B].isBoom()) {
+								//console.log("tile + boom");
+								this.sprites[B].setHit(true);
+							}
+							if (this.sprites[A].isLink() && this.sprites[B].isTile()) {
+								//console.log("link + tile");
+								this.link.getOutOfTile(this.sprites[B]);
+							}
+
+
+						}
+					}
+
+					if (this.sprites[A].isBoom()) {
+						if (this.sprites[A].isHit()) {
+							this.sprites[A].setHit(false);
+							this.Bthrow = this.Bthrow - 1;
+							this.sprites.splice(A, 1);
+
+						}
+					}
+
+					if (this.sprites[A].isPot()) {
+						if (this.sprites[A].isHit()) {
+							this.Pcount++
+
+							if (this.Pcount > 100) {
+								this.Pcount = 0;
+								this.sprites[A].setHit(false);
+								this.sprites.splice(A, 1);
+							}
+
+						}
+					}
+				}
+
+
+			}
+
+			//adding boomerangs
+			addBoom(X, Y, D) {
+				this.sprites.push(new Boomerang(X, Y, 36, 36, "boomerang1.png", D));
+				this.Bthrow++;
+			}
+
+			//collision checker
+			isCollision(a, b) {
+				let aR = a.x + a.w;
+				let aL = a.x;
+				let aH = a.y;
+				let aB = a.y + a.h;
+
+				let bR = b.x + b.w;
+				let bL = b.x;
+				let bT = b.y;
+				let bB = b.y + b.h;
+
+
+				//-------NO COLLISION-------//
+
+
+				if (aR < bL) {
+					return false;
+				}
+				if (aL > bR) {
+					return false;
+				}
+
+				if (aB < bT) {
+					return false;
+				}
+				if (aH > bB) {
+					return false;
+				}
+
+				return true;
+			}
+		}
+
+
+		class Controller {
+			constructor(model, view) {
+				this.model = model;
+				this.view = view;
+				this.key_right = false;
+				this.key_left = false;
+				this.key_down = false;
+				this.key_up = false;
+				this.control = false;
+				this.direction = 0;
+				let self = this;
+
+
+				document.addEventListener('keydown', function (event) { self.keyDown(event); }, false);
+				document.addEventListener('keyup', function (event) { self.keyUp(event); }, false);
+			}
+
+			keyDown(event) {
+				if (event.keyCode == 39) this.key_right = true;
+				else if (event.keyCode == 17) this.control = true;
+				else if (event.keyCode == 37) this.key_left = true;
+				else if (event.keyCode == 38) this.key_up = true;
+				else if (event.keyCode == 40) this.key_down = true;
+
+			}
+
+			keyUp(event) {
+				if (event.keyCode == 39) this.key_right = false;
+				else if (event.keyCode == 17) this.control = false;
+				else if (event.keyCode == 37) this.key_left = false;
+				else if (event.keyCode == 38) this.key_up = false;
+				else if (event.keyCode == 40) this.key_down = false;
+			}
+
+			update() {
+				if (this.key_right) {
+					this.model.link.x += 4;
+					this.direction = 3;
+
+					this.model.link.changeImageStateR();
+					if (this.model.link.x >= 450) {
+						this.model.link.scrollX = 450;
+						//console.log("room right");
+					}
+				}
+
+				if (this.key_left) {
+					this.model.link.x -= 4;
+					this.direction = 4;
+
+					this.model.link.changeImageStateL();
+					if (this.model.link.x <= 400) {
+						this.model.link.scrollX = 0;
+						//console.log("room left");
+					}
+
+				}
+				if (this.key_up) {
+					this.model.link.y -= 4;
+					this.direction = 2;
+
+					this.model.link.changeImageStateU();
+					if (this.model.link.y <= 450) {
+						this.model.link.scrollY = 0;
+						//console.log("room up");
+					}
+				}
+
+				if (this.key_down) {
+					this.model.link.y += 4;
+					this.direction = 1;
+					this.model.link.changeImageStateD();
+					if (this.model.link.y >= 450) {
+						this.model.link.scrollY = 450;
+						//console.log("room down");
+					}
+				}
+
+				if (this.control) {
+					this.model.addBoom(this.model.link.x, this.model.link.y, this.direction);
+					this.control = false;
+				}
+
+				this.model.direction = this.direction;
+			}
+		}
+
+
+		class View {
+			constructor(model) {
+				this.model = model;
+				this.canvas = document.getElementById("myCanvas");
+				//this.scrollPosY;
+				//this.scrollPosX;
+			}
+
+			scrollPosX(scrollX) {
+				this.scrollPosX = this.scrollX;
+			}
+			scrollPosY(scrollY) {
+				this.scrollPosY = this.scrollY;
+			}
+
+			update() {
+				let c = this.canvas.getContext("2d");
+
+				c.clearRect(0, 0, 1000, 500);
+
+				for (let j = 0; j < this.model.sprites.length; j++) {
+					let sprite = this.model.sprites[j];
+					c.drawImage(sprite.im, sprite.x - this.scrollPosX, sprite.y - this.scrollPosY);
+				}
+
+				for (let i = 0; i < this.model.sprites.length; i++) {
+					this.scrollPosX = this.model.link.scrollX;
+					this.scrollPosY = this.model.link.scrollY;
+				}
+			}
+		}
+
+
+		class Game {
+			constructor() {
+				this.model = new Model();
+				this.view = new View(this.model);
+				this.controller = new Controller(this.model, this.view);
+			}
+
+			onTimer() {
+				this.controller.update();
+				this.model.update();
+				this.view.update();
+			}
+		}
+
+		let scrollPosX = 0;
+		let scrollPosY = 0;
+		let c = new Game();
+		let timer = setInterval(function () { c.onTimer(); }, 40);
+
+
+
+	</script>
+
+
+</body>
+
+</html>
